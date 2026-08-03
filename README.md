@@ -60,7 +60,9 @@ complexity should be validated empirically rather than assumed — the extra
 machinery in X-/DR-learners pays off mainly under conditions (e.g. treatment-group
 imbalance, misspecified outcome models) that this dataset does not stress.
 
-<img src="qini_curves.png" width="60%">
+<p align="center">
+  <img src="qini_curves.png" width="60%">
+</p>
 
 *Qini curves for all four learners against the random baseline. Curves above the
 diagonal indicate a ranking better than random targeting.*
