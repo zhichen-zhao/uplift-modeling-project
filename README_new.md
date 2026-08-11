@@ -20,14 +20,103 @@ lesson:
 > underperform and are sensitive to sample size. Complexity that isn't needed
 > becomes a source of noise, not a source of gain.
 
-| Dataset | Samples | Signal | Best learner | Key observation |
+| Dataset | Samples | Signal | Best learner (Qini) | Key observation |
 |---|---|---|---|---|
-| Synthetic | 5k | strong | **S-learner** | simplest learner wins |
-| Hillstrom (email RCT) | 42k | weak | **T-learner** (≈ random) | real email-marketing signal is faint |
-| Lenta (SMS RCT) | 687k | moderate | **T-learner** | T robust; **X-learner worst**; targeting doubles real uplift |
+| Synthetic | 5k | strong | **S-learner (0.15)** | simplest learner wins; X/DR no better |
+| Hillstrom (email RCT) | 42k | weak | **T-learner (0.02)** | all learners ≈ random; email-marketing signal is faint |
+| Lenta (SMS RCT) | 687k | moderate | **T-learner (0.16)** | T robust; **X-learner worst (−0.09)**; targeting doubles real uplift |
 
-*(Exact numbers depend on the run; the pattern — simple beats complex — is what
-holds up across all three.)*
+*(Exact numbers depend on the run and carry noise; the pattern — simple beats
+complex, across all three datasets — is what holds up.)*
+
+## Results
+
+The synthetic and Hillstrom studies go as far as **modeling and evaluation**
+(compare learners, read the Qini). Lenta goes one step further into
+**deployment**: refit the winner, score a held-out set the model never saw, pick
+the top 20%, and check the *real* uplift of those selected people.
+
+### Synthetic (strong signal) — modeling + evaluation
+
+| Learner | Qini score |
+|---|---|
+| **S-learner** | **0.154** |
+| T-learner | 0.147 |
+| X-learner | 0.130 |
+| DR-learner | 0.129 |
+
+With a strong, clean effect, all four rank well above random and the **simplest
+learner (S) wins**. The extra machinery of X-/DR-learners buys nothing here —
+their advantages (group imbalance, misspecified models) aren't stressed by this
+data.
+
+### Hillstrom email RCT (weak signal) — modeling + evaluation
+
+| Learner | Qini score |
+|---|---|
+| **T-learner** | **0.020** |
+| S-learner | 0.013 |
+| X-learner | 0.011 |
+| DR-learner | −0.004 |
+
+<img src="images/hillstrom_qini.png" width="55%">
+
+*All four curves hug the random diagonal.* Email-marketing uplift is genuinely
+faint — most customers behave about the same whether or not they get an email —
+so no learner ranks much better than random, and the differences between them are
+within noise. This is an honest and important result: **a method that shines on
+synthetic data can be near-useless when the real-world signal is weak.**
+
+### Lenta SMS RCT (moderate signal) — modeling + evaluation + **deployment**
+
+| Learner | Qini score |
+|---|---|
+| **T-learner** | **0.156** |
+| DR-learner | 0.049 |
+| S-learner | −0.059 |
+| X-learner | −0.092 |
+
+<img src="images/lenta_qini.png" width="55%">
+
+*The T-learner (red) rises well above random through the first half of the
+population; the X-learner (yellow) stays below it.* Only the two simplest
+constructions are clearly useful, and the elaborate **X-learner does worse than
+random** — with ample samples in both arms, its cross-imputation machinery adds
+noise instead of value.
+
+**Deployment + validation (the extra step, unique to Lenta).** The best learner
+was refit on the development set and used to score a fully **held-out 20%** the
+model never trained on. Selecting the top 20% by predicted uplift and checking
+their *real* response (using the held-out `T` and `Y`):
+
+| Group | Actual uplift |
+|---|---|
+| **Selected top 20%** | **0.023** |
+| The rest 80% | 0.007 |
+| Whole population | 0.011 |
+
+The targeted group's real uplift is **~2× the population average** and ~3× the
+rest — using one-fifth of the reach. This closes the loop from *evaluation* to
+an *honest business decision*: whom to actually contact.
+
+## Conclusion
+
+Across a strong-signal synthetic benchmark, a weak-signal email RCT, and a
+moderate-signal SMS RCT, one pattern is consistent:
+
+- **Simple learners (S, T) are the most robust.** They won or tied on every
+  dataset.
+- **Complex learners (X, DR) did not pay off** — X-learner even went *negative*
+  on Lenta, and complex learners were more sensitive to sample size (DR went from
+  −0.004 at 42k to +0.049 at 687k). Their theoretical advantages need conditions
+  this data didn't stress.
+- **Signal strength decides everything.** The same pipeline is genuinely useful
+  on Lenta (targeting doubles uplift) and near-useless on Hillstrom (all ≈
+  random). Knowing *when a method won't help* is as important as knowing when it
+  will.
+
+The practical takeaway: **match estimator complexity to the problem, and validate
+it empirically rather than assuming more complex is better.**
 
 ## Method
 
@@ -78,8 +167,9 @@ complexity did **not** pay off.
   `Y` = customer response (binary, ~11%); `X` = ~190 anonymized features, mostly
   historical grocery-purchase statistics per time window and product group, plus
   gender / age / store type. The **moderate-signal** case where targeting works:
-  the top-20% selected by the model showed roughly double the real uplift of the
-  population average, validated on a fully held-out set.
+  on a fully held-out 20%, the top-20% selected by the model showed about double
+  the real uplift of the population average (0.023 vs. 0.011), validated with the
+  held-out set's real `T` and `Y`.
 
 ## Why randomized data matters
 
@@ -97,7 +187,10 @@ uplift-modeling-project/
 ├── requirements.txt
 ├── uplift_synthetic.py     # synthetic benchmark (strong signal)
 ├── uplift_hillstrom.py     # Hillstrom email RCT (weak signal)
-└── uplift_lenta.py         # Lenta SMS RCT (moderate signal, targeting validated)
+├── uplift_lenta.py         # Lenta SMS RCT (moderate signal, targeting validated)
+└── images/
+    ├── hillstrom_qini.png  # Qini curves — Hillstrom (weak signal)
+    └── lenta_qini.png      # Qini curves — Lenta (moderate signal)
 ```
 
 ## Running
