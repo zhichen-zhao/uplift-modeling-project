@@ -4,3 +4,4 @@ matplotlib
 scikit-learn
 econml
 causalml
+scikit-uplift
