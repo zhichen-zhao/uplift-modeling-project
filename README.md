@@ -2,8 +2,9 @@
 
 Comparing four causal **meta-learners** (S-, T-, X-, and DR-learner) for
 estimating individual treatment effects (CATE) and deciding **whom to target**,
-across three datasets of increasing realism: a synthetic benchmark, and two
-real marketing randomized experiments (Hillstrom and Lenta).
+across three datasets that span both causal data regimes: an **observational**
+synthetic benchmark, and two **randomized** real marketing experiments
+(Hillstrom and Lenta).
 
 The central question of uplift modeling is not "who will respond?" but **"whose
 response is *caused* by the treatment?"** — the people worth spending budget on.
@@ -45,8 +46,6 @@ the top 20%, and check the *real* uplift of those selected people.
 | X-learner | 0.130 |
 | DR-learner | 0.129 |
 
-<img src="synthetic_qini.png" width="55%">
-
 With a strong, clean effect, all four rank well above random and the **simplest
 learner (S) wins**. The extra machinery of X-/DR-learners buys nothing here —
 their advantages (group imbalance, misspecified models) aren't stressed by this
@@ -61,7 +60,7 @@ data.
 | X-learner | 0.011 |
 | DR-learner | −0.004 |
 
-<img src="hillstrom_qini.png" width="55%">
+<img src="images/hillstrom_qini.png" width="55%">
 
 *All four curves hug the random diagonal.* Email-marketing uplift is genuinely
 faint — most customers behave about the same whether or not they get an email —
@@ -78,7 +77,7 @@ synthetic data can be near-useless when the real-world signal is weak.**
 | S-learner | −0.059 |
 | X-learner | −0.092 |
 
-<img src="lenta_qini.png" width="55%">
+<img src="images/lenta_qini.png" width="55%">
 
 *The T-learner (red) rises well above random through the first half of the
 population; the X-learner (yellow) stays below it.* Only the two simplest
@@ -157,7 +156,8 @@ complexity did **not** pay off.
 
 ## The datasets
 
-- **Synthetic** (`uplift_synthetic.py`) — a controlled benchmark with a strong,
+- **Synthetic** (`uplift_synthetic.py`) — a controlled **observational**
+  benchmark (covariate-dependent propensity, `e(x)` ~ 0.1–0.9) with a strong,
   known effect. The "easy mode" that confirms the pipeline works when signal is
   abundant. The true effect is deliberately discarded; evaluation uses only
   observed `Y` and `T`, as in reality.
@@ -173,13 +173,23 @@ complexity did **not** pay off.
   the real uplift of the population average (0.023 vs. 0.011), validated with the
   held-out set's real `T` and `Y`.
 
-## Why randomized data matters
+## Observational vs. randomized data
 
-All three treatments are **randomized**, so the treated and control groups are
-statistically balanced and the difference in outcomes can be attributed cleanly
-to the treatment (no confounding). This makes them honest settings for uplift.
-On observational data the same estimators can be biased, which is exactly where
-doubly-robust methods and stronger assumptions (unconfoundedness) come in.
+The three datasets span **both** causal data regimes, which is itself part of the
+exercise:
+
+- **Synthetic is observational** — its treatment is assigned with a
+  covariate-dependent propensity `e(x)` (here ranging ~0.1–0.9), so treatment and
+  features are correlated. Unbiased effect estimation relies on the
+  **unconfoundedness** assumption plus methods that adjust for the propensity
+  (this is exactly where the doubly-robust DR-learner earns its keep).
+- **Hillstrom and Lenta are randomized (RCTs)** — treatment is assigned at
+  random, so the treated and control groups are balanced on features and the
+  outcome difference is a clean causal effect, no adjustment needed.
+
+Working across both regimes mirrors the real distinction that drives causal
+inference: on randomized data almost anything works; on observational data the
+propensity model matters and naive estimates can be biased.
 
 ## Repository structure
 
@@ -190,9 +200,9 @@ uplift-modeling-project/
 ├── uplift_synthetic.py     # synthetic benchmark (strong signal)
 ├── uplift_hillstrom.py     # Hillstrom email RCT (weak signal)
 ├── uplift_lenta.py         # Lenta SMS RCT (moderate signal, targeting validated)
-├── synthetic_qini.png  # Qini curves - Synthetic (strong signal)
-├── hillstrom_qini.png  # Qini curves — Hillstrom (weak signal)
-└── lenta_qini.png      # Qini curves — Lenta (moderate signal)
+└── images/
+    ├── hillstrom_qini.png  # Qini curves — Hillstrom (weak signal)
+    └── lenta_qini.png      # Qini curves — Lenta (moderate signal)
 ```
 
 ## Running

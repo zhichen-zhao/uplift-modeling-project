@@ -7,6 +7,11 @@ mode" that shows the pipeline works when signal is abundant. (The two real-data
 scripts -- Hillstrom and Lenta -- then show what happens when signal is weak or
 moderate.)
 
+Note: causalml's synthetic_data (mode=1) uses a covariate-dependent propensity
+e(x), so this is an OBSERVATIONAL dataset (treatment correlated with features),
+unlike the randomized Hillstrom and Lenta RCTs. Unbiasedness here rests on
+unconfoundedness; the DR-learner's propensity model is what handles it.
+
 We deliberately DISCARD the true effect and evaluate only with observed Y and T,
 exactly as we would have to in the real world.
 
