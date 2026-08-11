@@ -202,9 +202,9 @@ uplift-modeling-project/
 ├── uplift_synthetic.py     # synthetic benchmark (strong signal)
 ├── uplift_hillstrom.py     # Hillstrom email RCT (weak signal)
 ├── uplift_lenta.py         # Lenta SMS RCT (moderate signal, targeting validated)
-└── images/
-    ├── hillstrom_qini.png  # Qini curves — Hillstrom (weak signal)
-    └── lenta_qini.png      # Qini curves — Lenta (moderate signal)
+├── synthetic_qini.png      # Qini curves — Synthetic (strong signal)
+├── hillstrom_qini.png      # Qini curves — Hillstrom (weak signal)
+└── lenta_qini.png          # Qini curves — Lenta (moderate signal)
 ```
 
 ## Running
