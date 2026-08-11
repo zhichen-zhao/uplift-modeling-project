@@ -45,6 +45,8 @@ the top 20%, and check the *real* uplift of those selected people.
 | X-learner | 0.130 |
 | DR-learner | 0.129 |
 
+<img src="synthetic_qini.png" width="55%">
+
 With a strong, clean effect, all four rank well above random and the **simplest
 learner (S) wins**. The extra machinery of X-/DR-learners buys nothing here —
 their advantages (group imbalance, misspecified models) aren't stressed by this
@@ -59,7 +61,7 @@ data.
 | X-learner | 0.011 |
 | DR-learner | −0.004 |
 
-<img src="images/hillstrom_qini.png" width="55%">
+<img src="hillstrom_qini.png" width="55%">
 
 *All four curves hug the random diagonal.* Email-marketing uplift is genuinely
 faint — most customers behave about the same whether or not they get an email —
@@ -76,7 +78,7 @@ synthetic data can be near-useless when the real-world signal is weak.**
 | S-learner | −0.059 |
 | X-learner | −0.092 |
 
-<img src="images/lenta_qini.png" width="55%">
+<img src="lenta_qini.png" width="55%">
 
 *The T-learner (red) rises well above random through the first half of the
 population; the X-learner (yellow) stays below it.* Only the two simplest
