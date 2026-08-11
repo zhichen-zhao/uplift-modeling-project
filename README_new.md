@@ -45,6 +45,8 @@ the top 20%, and check the *real* uplift of those selected people.
 | X-learner | 0.130 |
 | DR-learner | 0.129 |
 
+<img src="images/synthetic_qini.png" width="55%">
+
 With a strong, clean effect, all four rank well above random and the **simplest
 learner (S) wins**. The extra machinery of X-/DR-learners buys nothing here —
 their advantages (group imbalance, misspecified models) aren't stressed by this
